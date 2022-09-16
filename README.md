@@ -10,7 +10,9 @@ This code is aimed to be usable by someone with no prior coding experience. To h
 Anaconda (and thus, Python) can be installed by visiting:
 
 Windows: https://docs.anaconda.com/anaconda/install/windows/
+
 Mac: https://docs.anaconda.com/anaconda/install/mac-os/
+
 Linux: https://docs.anaconda.com/anaconda/install/linux/
 
 Once Anaconda has been installed, you should be able to find "Anaconda Prompt", and open it to get a command window. Type 
