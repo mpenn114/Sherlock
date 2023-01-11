@@ -57,11 +57,22 @@ and then press enter. It should open in your web browser (note: you do not need 
 
 <h3> Opening Sherlock </h3>
 
-You can copy the code for Sherlock onto your computer by opening a new notebook (by clicking the "Python 3" button below "Notebook" in the right hand window. Then, there should be a textbox with your cursor inside it. You can copy the code for Sherlock by copying
+You can copy the code for Sherlock onto your computer by opening a new notebook (by clicking the "Python 3" button below "Notebook" in the right hand window. Then, there should be a textbox with your cursor inside it. If you have Git installed on your computer (which you can install from here https://github.com/git-guides/install-git), you can copy the code for Sherlock by copying
 
 !git clone https://github.com/mpenn114/Sherlock
 
-into this textbox, and then pressing the run button (which is a button in the row of buttons above the textbox - it looks like a "play" button. You should then be able to see a folder called Sherlock on the left hand side of the screen. Double-click on this folder to open it, and then double-click on the file "Sherlock.ipynb" to open the notebook for Sherlock. This should then appear on the right hand window.
+into this textbox, and then pressing the run button (which is a button in the row of buttons above the textbox - it looks like a "play" button). You should then be able to see a folder called Sherlock on the left hand side of the screen. Double-click on this folder to open it, and then double-click on the file "Sherlock.ipynb" to open the notebook for Sherlock. This should then appear on the right hand window.
+
+Otherwise, you can download the code from this repository as a zip file. After extracting this code (right click on the zip file and click "Extract All"), you then will need to copy the notebook "Sherlock.ipynb" to the folder that Python opens with when you start Jupyter Lab. On Windows, this will generally be "C:/Users/[Your username]".
 
 This file then contains all the information needed to run the code at the top. The actual code is below this initial text and, once you are happy with the inputs and parameters, you can run it by pressing the clicking somewhere on it, and then pressing the "run" button.
+
+Note: If you are using an old Mac operating system (iOS 13 or earlier) then you may have an error when running the code. This can be fixed by removing the line 
+
+!pip install opencv-python
+
+from the code and replacing it with the two lines
+
+!pip uninstall opencv-python --y
+!pip install opencv-python==4.4.0.46
 
