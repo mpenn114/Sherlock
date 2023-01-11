@@ -74,5 +74,7 @@ Note: If you are using an old Mac operating system (iOS 13 or earlier) then you 
 from the code and replacing it with the two lines
 
 !pip uninstall opencv-python --y
+
 !pip install opencv-python==4.4.0.46
 
+The code should then run without any errors.
