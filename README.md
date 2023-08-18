@@ -78,3 +78,5 @@ from the code and replacing it with the two lines
 !pip install opencv-python==4.4.0.46
 
 The code should then run without any errors.
+
+If you are using a camera with an unusual metadata format, then you may need to use the Sherlock_legacy.ipynb file instead. This manually detects whether an image was taken during the day or at night, rather than using the image metadata. Do feel free to log this as an issue if the main version doesn't work and we will seek to add a fix!
