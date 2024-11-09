@@ -5,13 +5,25 @@ Its aim is to remove false positive images - that is, principally, images where 
 
 This code is aimed to be usable by someone with no prior coding experience. To help this, a guide to installing Python (the language which Sherlock is written in) is provided at the end of this readme.
 
+# Introduction
 
-# Variables
+Sherlock is designed to run through multiple folder of images, and requires only the root folder of these images. It will then look through all subfolders and process each image contained in them.
+
+# Running Sherlock
+
+You can copy the code for Sherlock onto your computer by opening a new Jupyter notebook on your computer Then, there should be a textbox with your cursor inside it. If you have Git installed on your computer (which you can install from here https://github.com/git-guides/install-git), you can copy the code for Sherlock by copying
+
+!git clone https://github.com/mpenn114/Sherlock
+
+into this textbox, and then pressing the run button (which is a button in the row of buttons above the textbox - it looks like a "play" button). You should then be able to see a folder called "sherlock" on the left hand side of the screen. Double-click on this folder to open it, and then double-click on the file "main_notebook.ipynb" to open the notebook for Sherlock. This should then appear on the right hand window.
 
 Below is the list of variables which can be configured for Sherlock. You can change these variables by editing the values in the following file:
 
 sherlock/config.py
 
+Note that in particular, you will need to change the root_directory variable, and perhaps the image prefix and image suffix. There are also a range of other variables which can be adjusted to optimise the performance of the code.
+
+# Variables
 
 | Name                        | Default Value                  | Description                                                                           |
 |-----------------------------|--------------------------------|---------------------------------------------------------------------------------------|
@@ -65,10 +77,3 @@ jupyter lab
 
 and then press enter. It should open in your web browser (note: you do not need an Internet connection to do this, or to run any of this code, except the section immediately following)
 
-<h3> Opening Sherlock </h3>
-
-You can copy the code for Sherlock onto your computer by opening a new notebook (by clicking the "Python 3" button below "Notebook" in the right hand window. Then, there should be a textbox with your cursor inside it. If you have Git installed on your computer (which you can install from here https://github.com/git-guides/install-git), you can copy the code for Sherlock by copying
-
-!git clone https://github.com/mpenn114/Sherlock
-
-into this textbox, and then pressing the run button (which is a button in the row of buttons above the textbox - it looks like a "play" button). You should then be able to see a folder called Sherlock on the left hand side of the screen. Double-click on this folder to open it, and then double-click on the file "Sherlock.ipynb" to open the notebook for Sherlock. This should then appear on the right hand window.
