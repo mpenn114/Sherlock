@@ -5,31 +5,41 @@ Its aim is to remove false positive images - that is, principally, images where 
 
 This code is aimed to be usable by someone with no prior coding experience. To help this, a guide to installing Python (the language which Sherlock is written in) is provided at the end of this readme.
 
-<h3> Input Format </h3>
 
-This code can process JPG images (NB: it should be possible to edit the code to accept any image format). These images should be stored in folders/subfolders, with a single "master folder" containing all of these folders. Examples of acceptable folder structures are below:
+# Variables
 
-[Master Folder] -> Images                                   (that is, an image would have the path .../MasterFolder/0001.JPG)
+Below is the list of variables which can be configured for Sherlock. You can change these variables by editing the values in the following file:
 
-[Master Folder] -> [Location Folders] -> Images             (e.g. .../MasterFolder/Aberystwyth/0001.JPG)
+sherlock/config.py
 
-[Master Folder] -> [Location Folders] -> [Sub-location Folders] -> Images   (e.g. .../MasterFolder/Aberystwyth/Constitution Hill/0001.JPG)
 
-[Master Folder] -> [Location Folders] -> [Sub-location Folders] > [Camera Number] -> Images  (e.g. .../MasterFolder/Aberystwyth/Constitution Hill/Camera1/0001.JPG)
-
-In all of these cases, it is simply necessary to specify the master folder. Note that it is also possible to have a mixture of these cases (e.g. some locations may not have sub-locations)
-
-It is important that the JPG images in each image folder are named consecutively as 0001.JPG, 0002.JPG, ... (note, the number of leading zeros is not important).
-
-<h3> Output Format </h3>
-
-The code can produce different kinds of outputs, depending on the needs of the user. 
-
-The primary output is, for each folder of images, a folder containing CSV files, labelled as "CSV_Outputs[Runcode]". These files are "Potential_Animals" (a list of all images that the code believes may contain animals); "Unlikely_Animals" (a list of all images that the code believes do not contain an animal); "Errors" (a list of images that could not be processed); "Close to Animals" (a list of images such that images close to them - in terms of image number and time - were identified as potential animals); "Overall Animals" (the combination of the lists in "Potential_Animals" and "Close_to_Animals") and "False_Negatives" (if the code is in "testing mode", explained below, a list of all the false negatives)
-
-It is also possible to get the code to write any potential animal images into a new folder, called "PotentialAnimals[Runcode]" where any of the images that are identified as animals, along with those that are close to them, are re-written with red boxes indicating the locations in which animals were thought to be. Note that this does not edit the original images in any way. However, it can be turned off if desired (as these images will be reasonably large files)
-
-Finally, the code can be put into "testing mode". This can be done by changing one of the parameters (explained at the start of the code file), and seeks to compare the results of the code with human-inputted results. A list of image numbers containing animals should be created, called "Animaldata.csv", and a list of image numbers not containing animals should be created, called "nonAnimaldata.csv". These should then be saved in the same folder as the images, and their inclusion will allow the code to create CSV outputs that compare the two sets of results. The code can also compare results according to a number of different characteristics of the image, such as time and location, provided that the format matches that of the example CSV which is included in this Github.
+| Name                        | Default Value                  | Description                                                                           |
+|-----------------------------|--------------------------------|---------------------------------------------------------------------------------------|
+| `root_directory`            | `"."`                           | The root directory for the images.                                                   |
+| `image_prefix`              | `"IMG"`                        | The prefix for the image files                                                        |
+| `image_suffix`              | `"JPG"`                        | The suffix for the image files                                                        |
+| `min_images_process`        | `1`                            | The minimum number of images in a folder in order to process it                                |                                                  |
+| `background_max_images`     | `100`                          | Max number of images to use when creating a background image.                                     |
+| `min_background_used`       | `5`                            | Minimum number of images to count as a viable background (otherwise all images associated with it are returned as positive)                             |
+| `sample_size`               | `5000`                         | Number of pixels to sample per image. Higher numbers lead to more accuracy, but will slow down the code                                              |
+| `bounces`                   | `4`                            | Number of iterations of the bounce algorithm. Higher numbers lead to more contours being merged (which can be unhelpful if this number is too high). Higher numbres also slow down the code                                             |
+| `colour_upper`              | `np.array([255, 255, 255])`   | Upper bound of color range to use when sampling pixels. **Note that these are in BGR not RGB**. The default value will accept all pixels.                                                          |
+| `colour_lower`              | `np.array([0, 0, 0])`         | Lower bound of color range when sampling pixels. **Note that these are in BGR not RGB**. The default value will accept all pixels                                                          |
+| `greyscale_parameter`       | `75`                           | Max range of colors in a pixel to be accepted. Setting to 256 will accept all pixels.                                                      |
+| `background_tol_day`        | `75`                           | Minimum distance from background for a pixel to be accepted.                          |
+| `image_size`                | `(1080, 720, 3)`               | The default image size; overridden as code runs                                       |
+| `count_pixels`              | `True`                         | Whether or not to count pixels in a contour before accepting                   |
+| `pixel_samples`             | `100`                          | Number of pixels to sample to assess disturbance proportion                           |
+| `disturbance_tol`           | `0.1`                          | Minimum proportion of pixels that are a disturbance for contour acceptance            |
+| `size_tol_day`              | `30000`                        | Required area (in pixels squared) for a contour to be accepted as an animal in daytime|
+| `size_tol_night`            | `5000`                         | Required area at night                                                                |
+| `secondary_color_upper`     | `np.array([75, 75, 75])`      | Secondary color upper bound for contour assessment (used only after contours have been created)                                   |
+| `secondary_color_lower`     | `np.array([0, 0, 0])`         | Secondary color lower bound                                                           |
+| `secondary_colour_tol`      | `0.05`                         | Tolerance for the proportion of pixels satisfying secondary color constraints in contours                                             |
+| `save_images`               | `False`                        | Whether or not to save images (saved images will include contours marked on)                                                       |
+| `adjacency`                 | `1`                            | Number of adjacent images to record as positives  (provided they satisfy the datetime tolerance)                                    |                                                   |
+| `datetime_adjacency_tolerance` | `20`                     | Max of seconds between the accepted image and another image to count as adjacent
+| `run_code`                  | `1`                            | The run code for this execution                                                    |
 
 <h3> Installing Python, Anaconda and Jupyter Lab </h3>
 
@@ -62,21 +72,3 @@ You can copy the code for Sherlock onto your computer by opening a new notebook 
 !git clone https://github.com/mpenn114/Sherlock
 
 into this textbox, and then pressing the run button (which is a button in the row of buttons above the textbox - it looks like a "play" button). You should then be able to see a folder called Sherlock on the left hand side of the screen. Double-click on this folder to open it, and then double-click on the file "Sherlock.ipynb" to open the notebook for Sherlock. This should then appear on the right hand window.
-
-Otherwise, you can download the code from this repository as a zip file. After extracting this code (right click on the zip file and click "Extract All"), you then will need to copy the notebook "Sherlock.ipynb" to the folder that Python opens with when you start Jupyter Lab. On Windows, this will generally be "C:/Users/[Your username]".
-
-This file then contains all the information needed to run the code at the top. The actual code is below this initial text and, once you are happy with the inputs and parameters, you can run it by pressing the clicking somewhere on it, and then pressing the "run" button.
-
-Note: If you are using an old Mac operating system (iOS 13 or earlier) then you may have an error when running the code. This can be fixed by removing the line 
-
-!pip install opencv-python
-
-from the code and replacing it with the two lines
-
-!pip uninstall opencv-python --y
-
-!pip install opencv-python==4.4.0.46
-
-The code should then run without any errors.
-
-If you are using a camera with an unusual metadata format, then you may need to use the Sherlock_legacy.ipynb file instead. This manually detects whether an image was taken during the day or at night, rather than using the image metadata. Do feel free to log this as an issue if the main version doesn't work and we will seek to add a fix!
