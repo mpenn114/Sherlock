@@ -29,6 +29,8 @@ sherlock/config.py
 
 Note that in particular, you will need to change the root_directory variable, and perhaps the image prefix and image suffix. There are also a range of other variables which can be adjusted to optimise the performance of the code.
 
+Note also that Sherlock saves its outputs and, if it is restarted, will not reprocess previously-processed images, provided the variable run_code is kept the same.
+
 # Variables
 
 | Name                        | Default Value                  | Description                                                                           |
@@ -44,7 +46,8 @@ Note that in particular, you will need to change the root_directory variable, an
 | `colour_upper`              | `np.array([255, 255, 255])`   | Upper bound of color range to use when sampling pixels. **Note that these are in BGR not RGB**. The default value will accept all pixels.                                                          |
 | `colour_lower`              | `np.array([0, 0, 0])`         | Lower bound of color range when sampling pixels. **Note that these are in BGR not RGB**. The default value will accept all pixels                                                          |
 | `greyscale_parameter`       | `75`                           | Max range of colors in a pixel to be accepted. Setting to 256 will accept all pixels.                                                      |
-| `background_tol_day`        | `75`                           | Minimum distance from background for a pixel to be accepted.                          |
+| `background_tol_day`        | `75`                           | Minimum distance from background for a pixel to be accepted in daytime.                          |
+| `background_tol_day`        | `75`                           | Minimum distance from background for a pixel to be accepted at night.     
 | `image_size`                | `(1080, 720, 3)`               | The default image size; overridden as code runs                                       |
 | `count_pixels`              | `True`                         | Whether or not to count pixels in a contour before accepting                   |
 | `pixel_samples`             | `100`                          | Number of pixels to sample to assess disturbance proportion                           |

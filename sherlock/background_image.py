@@ -12,7 +12,7 @@ ENV = EnvSettings()
 
 def make_background_image(
     folder_path: str, current_image_index: int
-) -> Tuple[np.ndarray, int, bool]:
+) -> Tuple[np.ndarray | None, int, bool]:
     """
     Make the background image from a set of images.
 
@@ -32,9 +32,9 @@ def make_background_image(
     ):
         image_path = f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
         image = cv2.imread(image_path)
-        if image:
+        if isinstance(image, np.ndarray):
 
-            if image_index == 0:
+            if image_index == current_image_index:
                 day_night_background = daytime_test(image, image_path)
             else:
                 day_night_image = daytime_test(image, image_path)
@@ -48,8 +48,10 @@ def make_background_image(
         else:
             day_night_background = False
             break
-
-    background_image = np.median(images, axis=0)
+    if len(images) > 0:
+        background_image = np.median(images, axis=0)
+    else:
+        background_image = None
 
     return background_image, image_index, day_night_background
 
@@ -70,7 +72,8 @@ def daytime_test(image: np.ndarray, image_path: str) -> bool:
         return image_metadata["Flash"] == 24
 
     else:
-        if ENV.image_metadata_warning_shown:
+        if not ENV.image_metadata_warning_shown:
+
             print('Warning: No field "Flash" found in image metadata')
             ENV.image_metadata_warning_shown = True
 

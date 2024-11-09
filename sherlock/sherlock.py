@@ -24,6 +24,7 @@ def process_folder(folder_path: str):
     """
     # Find max image
     max_image = find_max_image_path(folder_path)
+    print(max_image)
     if not max_image:
         return
 
@@ -38,12 +39,12 @@ def process_folder(folder_path: str):
         processed_data = {"completed": False, "images": {}}
 
     image_index = 1
-    while image_index < max_image:
+    while image_index < max_image + 1:
         if image_index in processed_data["images"]:
             print(f"Skipping image {image_index} as it has been previously processed")
             continue  # image already processed
 
-        if not os.path.isdir(
+        if not os.path.isfile(
             f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
         ):
             image_index += 1
@@ -52,31 +53,37 @@ def process_folder(folder_path: str):
         background_image, background_end_index, is_daytime = make_background_image(
             folder_path, image_index
         )
-        used_images = background_end_index - image_index + 1
-        while image_index <= background_end_index:
+        used_images = background_end_index - image_index
+        while image_index < background_end_index:
 
             if used_images < ENV.min_background_used:
-                processed_data["images"][image_index] = {
+                processed_data["images"][str(image_index)] = {
                     "status": "animal",
                     "reason": "insufficient background images",
                     "contours": 0,
+                    "error": True,
                 }
+                print(
+                    f"Skipping image {image_index} as insufficient background images (counting as true)"
+                )
+                image_index += 1
+                continue
             else:
                 image_path = f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
                 image = cv2.imread(image_path)
 
-                if not (image and background_image):
+                if image is None or background_image is None:
                     # Error processing image
                     if image_index in processed_data["images"]:
-                        processed_data["images"][image_index]["error"] = False
+                        processed_data["images"][str(image_index)]["error"] = False
                     else:
-                        processed_data["images"][image_index] = {
+                        processed_data["images"][str(image_index)] = {
                             "status": "error",
                             "error": True,
                             "contours": 0,
                         }
                     image_index += 1
-
+                    continue
                 image_static = image.copy()
                 date_time = extract_datetime(image_path)
                 lefts, rights, bottoms, tops = animal_finder(
@@ -105,8 +112,10 @@ def process_folder(folder_path: str):
                             )
 
                             # Extract image and background samples using vectorized operations
-                            image_samples = image[x_samples, y_samples]
-                            background_samples = background_image[x_samples, y_samples]
+                            image_samples = image[x_samples, y_samples, :]
+                            background_samples = background_image[
+                                x_samples, y_samples, :
+                            ]
 
                             # Calculate the pixel differences in a vectorized manner
                             pixel_diffs = np.abs(
@@ -114,14 +123,14 @@ def process_folder(folder_path: str):
                                 - background_samples.astype(int)
                             )
                             curr_dists = np.max(
-                                pixel_diffs, axis=2
+                                pixel_diffs, axis=1
                             )  # Get max diff per pixel
 
                             # Check if any pixel meets the conditions
                             valid_pixels = np.all(
-                                image_samples.astype(float) > ENV.colour_lower, axis=2
+                                image_samples.astype(float) > ENV.colour_lower, axis=1
                             ) & np.all(
-                                image_samples.astype(float) < ENV.colour_upper, axis=2
+                                image_samples.astype(float) < ENV.colour_upper, axis=1
                             )
 
                             # Calculate the number of valid pixels
@@ -130,12 +139,17 @@ def process_folder(folder_path: str):
                             )
 
                             # Check for black pixels
-                            secondary_colour_pixels = np.all(
-                                image_samples.astype(float) < ENV.secondary_color_upper,
-                                axis=2,
-                            ) & np.all(
-                                image_samples.astype(float) > ENV.secondary_color_lower,
-                                axis=2,
+                            secondary_colour_pixels = np.sum(
+                                np.all(
+                                    image_samples.astype(float)
+                                    < ENV.secondary_color_upper,
+                                    axis=1,
+                                )
+                                & np.all(
+                                    image_samples.astype(float)
+                                    > ENV.secondary_color_lower,
+                                    axis=1,
+                                )
                             )
 
                             # Check if thresholds are exceeded
@@ -166,7 +180,7 @@ def process_folder(folder_path: str):
                                 )
 
             if contours_found > 0:
-                processed_data["images"][image_index] = {
+                processed_data["images"][str(image_index)] = {
                     "status": "animal",
                     "reason": "contour found",
                     "contours": contours_found,
@@ -182,43 +196,60 @@ def process_folder(folder_path: str):
                     )
             else:
                 if image_index in processed_data["images"]:
-                    processed_data["images"][image_index]["contours"] = 0
+                    processed_data["images"][str(image_index)]["contours"] = 0
                 else:
-                    processed_data["images"][image_index] = {
+                    processed_data["images"][str(image_index)] = {
                         "status": "no animal",
                         "reason": "no contour found",
                         "contours": 0,
                     }
-
-            for trial_index in range(-ENV.adjacency, ENV.adjacency):
-                if date_time == "1800-01-01":
-                    print("Error: Could not parse date from image metadata")
-                if trial_index == 0:
-                    continue
-
-                trial_image_path = f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
-                if not os.path.isfile(trial_image_path):
-                    continue
-
-                trial_date_time = extract_datetime(trial_image_path)
-
-                if (
-                    datetime_difference(trial_date_time, date_time)
-                    < ENV.datetime_adjacency_tolerance
+            if contours_found > 0:
+                for trial_index in range(
+                    image_index - ENV.adjacency, image_index + ENV.adjacency
                 ):
-                    if trial_index in processed_data["images"]:
-                        processed_data["images"][trial_index]["status"] = "animal"
-                        processed_data["images"][trial_index]["adjacency"] = True
-                    else:
-                        processed_data["images"][image_index] = {
-                            "status": "animal",
-                            "reason": "adjacent",
-                            "contours": 0,
-                            "adjacency": True,
-                        }
+                    if trial_index <= 0 or trial_index > max_image:
+                        continue
+                    if date_time == "1800-01-01 00:00:00":
+                        print("Error: Could not parse date from image metadata")
+                    if trial_index == image_index:
+                        continue
+
+                    trial_image_path = f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
+                    if not os.path.isfile(trial_image_path):
+                        continue
+
+                    trial_date_time = extract_datetime(trial_image_path)
+
+                    if (
+                        datetime_difference(trial_date_time, date_time)
+                        < ENV.datetime_adjacency_tolerance
+                    ):
+                        if str(trial_index) in processed_data["images"]:
+                            processed_data["images"][str(trial_index)][
+                                "status"
+                            ] = "animal"
+                            processed_data["images"][str(trial_index)][
+                                "adjacency"
+                            ] = True
+                            if (
+                                processed_data["images"][str(trial_index)]["reason"]
+                                == "no contour found"
+                            ):
+                                processed_data["images"][str(trial_index)][
+                                    "reason"
+                                ] = "adjacent"
+
+                        else:
+                            processed_data["images"][str(trial_index)] = {
+                                "status": "animal",
+                                "reason": "adjacent",
+                                "contours": 0,
+                                "adjacency": True,
+                            }
             # Save JSON at each step
             json.dump(processed_data, open(json_path, "w"))
             print(f"Image {image_index} processed")
             image_index += 1
     processed_data["completed"] = True
+    json.dump(processed_data, open(json_path, "w"))
     create_summary_csv(processed_data, folder_path)

@@ -42,7 +42,9 @@ def animal_finder(image: np.ndarray, background_image: np.ndarray, is_daytime: b
         )
 
         if is_new_point:
-            left, right, top, bottom = bounce(image, position, is_daytime, position)
+            left, right, top, bottom = bounce(
+                image, background_image, is_daytime, position
+            )
 
             if left < right and bottom < top:
                 for _ in range(ENV.bounces):
@@ -188,9 +190,6 @@ def bounce(
     Returns:
         Tuple[float, float, float, float]: Bounding coordinates in the order (left, right, top, bottom).
     """
-    background_tolerance = (
-        ENV.background_tol_day if is_daytime else ENV.background_tol_night
-    )
     initial_position = position.copy()
 
     left_bound, right_bound = position[0], position[0]
@@ -201,7 +200,7 @@ def bounce(
         position, movement = directional_walk(
             image,
             background_image,
-            background_tolerance,
+            is_daytime,
             np.array([0.0, 1.0]),
             position,
         )
@@ -209,7 +208,7 @@ def bounce(
             position, movement = directional_walk(
                 image,
                 background_image,
-                background_tolerance,
+                is_daytime,
                 np.array([-1.0, 1.0]),
                 position,
             )
@@ -217,7 +216,7 @@ def bounce(
                 position, movement = directional_walk(
                     image,
                     background_image,
-                    background_tolerance,
+                    is_daytime,
                     np.array([1.0, 1.0]),
                     position,
                 )
@@ -233,7 +232,7 @@ def bounce(
         position, movement = directional_walk(
             image,
             background_image,
-            background_tolerance,
+            is_daytime,
             np.array([0.0, -1.0]),
             position,
         )
@@ -241,7 +240,7 @@ def bounce(
             position, movement = directional_walk(
                 image,
                 background_image,
-                background_tolerance,
+                is_daytime,
                 np.array([1.0, -1.0]),
                 position,
             )
@@ -249,7 +248,7 @@ def bounce(
                 position, movement = directional_walk(
                     image,
                     background_image,
-                    background_tolerance,
+                    is_daytime,
                     np.array([-1.0, -1.0]),
                     position,
                 )
@@ -265,7 +264,7 @@ def bounce(
         position, movement = directional_walk(
             image,
             background_image,
-            background_tolerance,
+            is_daytime,
             np.array([-1.0, 0.0]),
             position,
         )
@@ -273,7 +272,7 @@ def bounce(
             position, movement = directional_walk(
                 image,
                 background_image,
-                background_tolerance,
+                is_daytime,
                 np.array([-1.0, -1.0]),
                 position,
             )
@@ -281,7 +280,7 @@ def bounce(
                 position, movement = directional_walk(
                     image,
                     background_image,
-                    background_tolerance,
+                    is_daytime,
                     np.array([-1.0, 1.0]),
                     position,
                 )
@@ -297,7 +296,7 @@ def bounce(
         position, movement = directional_walk(
             image,
             background_image,
-            background_tolerance,
+            is_daytime,
             np.array([1.0, 0.0]),
             position,
         )
@@ -305,7 +304,7 @@ def bounce(
             position, movement = directional_walk(
                 image,
                 background_image,
-                background_tolerance,
+                is_daytime,
                 np.array([1.0, -1.0]),
                 position,
             )
@@ -313,7 +312,7 @@ def bounce(
                 position, movement = directional_walk(
                     image,
                     background_image,
-                    background_tolerance,
+                    is_daytime,
                     np.array([1.0, 1.0]),
                     position,
                 )
@@ -416,8 +415,8 @@ def directional_walk(
             ]
 
             # Check if the image sample is within the expected color range
-            color_test = np.sum(image_sample > np.array(ENV.colour_lower)) + np.sum(
-                image_sample < np.array(ENV.colour_upper)
+            color_test = np.sum(image_sample > ENV.colour_lower) + np.sum(
+                image_sample < ENV.colour_upper
             )
 
             if (

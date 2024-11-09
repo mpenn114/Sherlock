@@ -22,9 +22,8 @@ def run_sherlock(root_path: str = ENV.root_directory):
         and root_path.split("/")[-1] != "positive_images"
     ):
         print(f"Running folder {root_path}")
-        
-        process_folder(root_path)
 
+        process_folder(root_path)
 
     # Process subfolders
     if os.path.isdir(root_path):

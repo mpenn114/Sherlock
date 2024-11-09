@@ -21,7 +21,7 @@ def create_summary_csv(processed_data: Dict[str, Any], folder_path: str):
         folder_path (str): The folder path
     """
     summary_data: List[pd.DataFrame] = []
-    for image_index, image_datum in processed_data.items():
+    for image_index, image_datum in processed_data["images"].items():
         summary_data.append(
             pd.DataFrame(
                 {
@@ -29,13 +29,17 @@ def create_summary_csv(processed_data: Dict[str, Any], folder_path: str):
                     "animal": [image_datum["status"] == "animal"],
                     "adjacent": ["adjacency" in image_datum],
                     "contours": [image_datum["contours"]],
-                    "reason": [image_datum["reason"]],
+                    "reason": [
+                        image_datum["reason"] if "reason" in image_datum else pd.NA
+                    ],
                     "error": ["error" in image_datum],
                 }
             )
         )
 
-    pd.concat(summary_data).to_csv(f"{folder_path}/summary_data.csv")
+    pd.concat(summary_data).to_csv(
+        f"{folder_path}/summary_data_{ENV.run_code}.csv", index=False
+    )
 
 
 def datetime_difference(dt1: str, dt2: str) -> bool:
@@ -57,11 +61,22 @@ def datetime_difference(dt1: str, dt2: str) -> bool:
               the tolerance, otherwise False.
     """
     # Parse the datetime strings into datetime objects
-    format_str = (
-        "%Y-%m-%d %H:%M:%S"  # assuming the format is like "YYYY-MM-DD HH:MM:SS"
-    )
-    dt1_obj = datetime.strptime(dt1, format_str)
-    dt2_obj = datetime.strptime(dt2, format_str)
+    try:
+        format_str = (
+            "%Y:%m:%d %H:%M:%S"  # assuming the format is like "YYYY:MM:DD HH:MM:SS"
+        )
+        dt1_obj = datetime.strptime(dt1, format_str)
+        dt2_obj = datetime.strptime(dt2, format_str)
+    except Exception:
+        try:
+            format_str = (
+                "%Y:%m:%d %H:%M:%S"  # assuming the format is like "YYYY-MM-DD HH:MM:SS"
+            )
+            dt1_obj = datetime.strptime(dt1, format_str)
+            dt2_obj = datetime.strptime(dt2, format_str)
+        except Exception:
+            print("Warning: datetime in unexpected format")
+            return False  # Do not say that the images are close to each other
 
     # Calculate the time difference between the two datetime objects
     time_diff = abs(dt1_obj - dt2_obj)
@@ -80,7 +95,7 @@ def extract_datetime(image_path: str) -> str:
     Returns:
         str: The datetime
     """
-    datetime_value = "1800-01-01"
+    datetime_value = "1800-01-01 00:00:00"
 
     try:
         image = Image.open(image_path)
@@ -97,9 +112,9 @@ def extract_datetime(image_path: str) -> str:
             if tag_name == "DateTime":
                 datetime_value = value
 
-    except Exception as e:
+    except Exception:
         # Handle potential errors (e.g., file not found, no EXIF data)
-        datetime_value = "1800-01-01"
+        datetime_value = "1800-01-01 00:00:00"
 
     return datetime_value
 
@@ -141,7 +156,9 @@ def set_image_shape(path_to_file: str, image_max: int):
         int: The number of images that do not have the same dimensions as the middle image.
     """
     mid_image_index = str(int(image_max / 2)).zfill(4)
-    mid_image_path = f"{path_to_file}IMG_{mid_image_index}.JPG"
+    mid_image_path = (
+        f"{path_to_file}/{ENV.image_prefix}_{mid_image_index}.{ENV.image_suffix}"
+    )
     if os.path.isfile(mid_image_path):
         mid_image = cv2.imread(mid_image_path)
         ENV.image_size = mid_image.shape

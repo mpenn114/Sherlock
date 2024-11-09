@@ -59,6 +59,9 @@ class EnvSettings:
             # How far away from background to be a disturbance
             self.background_tol_day: int = 75
 
+            # How far away from background to be a disturbance at night
+            self.background_tol_night: int = 10
+
             # The default image size (overridden as code runs)
             self.image_size: tuple[int, int, int] = (1080, 720, 3)
 
