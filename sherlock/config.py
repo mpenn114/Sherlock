@@ -49,15 +49,6 @@ class EnvSettings:
             self.background_tol_day = (
                 75  # How far away from background to be a disturbance
             )
-            self.background_tol_night = 10  # How far away in night to be a disturbance
-            self.animal_data_path = (
-                "animal_data.csv"  # The path to animal data if there is any
-            )
-            self.test_data_animals = pd.DataFrame({})  # Test data store
-            self.no_animal_data_path = (
-                "no_animal_data.csv"  # The path to animal data if there is any
-            )
-            self.test_data_no_animals = pd.DataFrame({})  # Test data store
             self.image_size = (
                 1080,
                 720,
