@@ -28,7 +28,9 @@ class EnvSettings:
             self.root_directory = ""  # The root directory for the images
             self.image_prefix = "IMG"  # The prefix for the image files
             self.image_suffix = "JPG"  # The suffix for the image files
-            self.min_images_process  = 1 # The minimum number of images in a folder to process it
+            self.min_images_process = (
+                1  # The minimum number of images in a folder to process it
+            )
             self.image_metadata_warning_shown = (
                 False  # Warn if metadata cannot be found
             )

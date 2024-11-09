@@ -9,12 +9,8 @@ import pandas as pd
 from .background_image import make_background_image
 from .config import EnvSettings
 from .process_images import animal_finder
-from .utils import (
-    datetime_difference,
-    extract_datetime,
-    find_max_image_path,
-    set_image_shape,
-)
+from .utils import (datetime_difference, extract_datetime, find_max_image_path,
+                    set_image_shape)
 
 ENV = EnvSettings()
 
