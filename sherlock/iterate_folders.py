@@ -19,7 +19,7 @@ def run_sherlock(root_path: str = ENV.root_directory):
     file_count = len(list(folder_path.glob(f"*{ENV.image_suffix}")))
     if (
         file_count > ENV.min_images_process
-        and folder_path.split("/")[-1] != "positive_images"
+        and root_path.split("/")[-1] != "positive_images"
     ):
         print(f"Running folder {root_path}")
         process_folder(root_path)

@@ -50,7 +50,6 @@ class EnvSettings:
                 75  # How far away from background to be a disturbance
             )
             self.background_tol_night = 10  # How far away in night to be a disturbance
-            self.testing_mode = False  # Whether or not we are testing the algorithm
             self.animal_data_path = (
                 "animal_data.csv"  # The path to animal data if there is any
             )

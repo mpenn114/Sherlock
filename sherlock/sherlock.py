@@ -9,8 +9,8 @@ import pandas as pd
 from .background_image import make_background_image
 from .config import EnvSettings
 from .process_images import animal_finder
-from .utils import (datetime_difference, extract_datetime, find_max_image_path,
-                    set_image_shape)
+from .utils import (create_summary_csv, datetime_difference, extract_datetime,
+                    find_max_image_path, set_image_shape)
 
 ENV = EnvSettings()
 
@@ -22,21 +22,6 @@ def process_folder(folder_path: str):
     Args:
         folder_path (str): The path to the folder
     """
-    if ENV.testing_mode:
-        animal_csv_path = f"{folder_path}/{ENV.animal_data_path}"
-        if os.path.isfile(animal_csv_path):
-            ENV.test_data_animals = pd.read_csv(animal_csv_path)
-
-        else:
-            print(f"Warning: No testing CSV found at {animal_csv_path}")
-
-        no_animal_csv_path = f"{folder_path}/{ENV.no_animal_data_path}"
-        if os.path.isfile(no_animal_csv_path):
-            ENV.test_data_no_animals = pd.read_csv(no_animal_csv_path)
-
-        else:
-            print(f"Warning: No testing CSV found at {no_animal_csv_path}")
-
     # Find max image
     max_image = find_max_image_path(folder_path)
     if not max_image:
@@ -74,6 +59,7 @@ def process_folder(folder_path: str):
                 processed_data["images"][image_index] = {
                     "status": "animal",
                     "reason": "insufficient background images",
+                    "contours": 0,
                 }
             else:
                 image_path = f"{folder_path}/{ENV.image_prefix}_{str(image_index).zfill(4)}.{ENV.image_suffix}"
@@ -87,6 +73,7 @@ def process_folder(folder_path: str):
                         processed_data["images"][image_index] = {
                             "status": "error",
                             "error": True,
+                            "contours": 0,
                         }
                     image_index += 1
 
@@ -233,3 +220,5 @@ def process_folder(folder_path: str):
             json.dump(processed_data, open(json_path, "w"))
             print(f"Image {image_index} processed")
             image_index += 1
+    processed_data["completed"] = True
+    create_summary_csv(processed_data, folder_path)

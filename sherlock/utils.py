@@ -1,14 +1,41 @@
 import os
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import cv2
+import pandas as pd
 from PIL import Image
 from PIL.ExifTags import TAGS
 
 from .config import EnvSettings
 
 ENV = EnvSettings()
+
+
+def create_summary_csv(processed_data: Dict[str, Any], folder_path: str):
+    """
+    Create a summary CSV for a folder.
+
+    Args:
+        processed_data (Dict[str,Any]): The processed data
+        folder_path (str): The folder path
+    """
+    summary_data: List[pd.DataFrame] = []
+    for image_index, image_datum in processed_data.items():
+        summary_data.append(
+            pd.DataFrame(
+                {
+                    "image_index": [image_index],
+                    "animal": [image_datum["status"] == "animal"],
+                    "adjacent": ["adjacency" in image_datum],
+                    "contours": [image_datum["contours"]],
+                    "reason": [image_datum["reason"]],
+                    "error": ["error" in image_datum],
+                }
+            )
+        )
+
+    pd.concat(summary_data).to_csv(f"{folder_path}/summary_data.csv")
 
 
 def datetime_difference(dt1: str, dt2: str) -> bool:
