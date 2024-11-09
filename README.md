@@ -9,6 +9,12 @@ This code is aimed to be usable by someone with no prior coding experience. To h
 
 Sherlock is designed to run through multiple folder of images, and requires only the root folder of these images. It will then look through all subfolders and process each image contained in them.
 
+A description of the method behind this code can be found at
+
+https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.14254
+
+Note that this code is now at version 2 - previous notebook-based implementations can be found within the sherlock_v1 folder.
+
 # Running Sherlock
 
 You can copy the code for Sherlock onto your computer by opening a new Jupyter notebook on your computer Then, there should be a textbox with your cursor inside it. If you have Git installed on your computer (which you can install from here https://github.com/git-guides/install-git), you can copy the code for Sherlock by copying
